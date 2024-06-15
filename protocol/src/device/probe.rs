@@ -41,6 +41,8 @@ pub enum DeviceKind {
     M2x4,
     #[cfg(feature = "device_flex")]
     Flex,
+    #[cfg(feature = "device_flex_ht")]
+    FlexHt,
 }
 
 /// Attempts to get a `&Device` from a DeviceInfo
@@ -74,6 +76,10 @@ pub fn probe_kind(device_info: &DeviceInfo) -> DeviceKind {
         (2, 22) => M2x4,
         #[cfg(feature = "device_flex")]
         (27, 100) => Flex,
+
+        #[cfg(feature = "device_flex_ht")]
+        (32, 113) => Flex, //get from `minidsp probe`
+
         _ => Generic,
     }
 }
@@ -115,5 +121,8 @@ pub fn by_kind(kind: DeviceKind) -> &'static super::Device {
 
         #[cfg(feature = "device_flex")]
         Flex => &super::flex::DEVICE,
+
+        #[cfg(feature = "device_flex_ht")]
+        FlexHt => &super::flex::DEVICE,
     }
 }
