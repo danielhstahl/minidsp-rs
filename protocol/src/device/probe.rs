@@ -78,7 +78,7 @@ pub fn probe_kind(device_info: &DeviceInfo) -> DeviceKind {
         (27, 100) => Flex,
 
         #[cfg(feature = "device_flex_ht")]
-        (32, 100) => Flex, //what is the second "type" of?
+        (32, 113) => Flex, //get from `minidsp probe`
 
         _ => Generic,
     }
