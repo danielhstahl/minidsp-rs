@@ -37,7 +37,6 @@ pub struct Input {
 pub struct Output {
     /// Mute and Gain
     pub gate: Gate,
-    pub bass_management: Option<Gate>,
     /// Volume Meter
     pub meter: Option<String>,
     /// Address of the delay value
@@ -71,7 +70,6 @@ pub struct Compressor {
     pub attack: String,
     pub release: String,
     pub meter: Option<String>,
-    pub knee: Option<String>,
 }
 
 #[derive(Debug)]

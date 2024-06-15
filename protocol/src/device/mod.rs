@@ -12,6 +12,7 @@ use super::{
 };
 
 mod probe;
+
 pub use probe::{by_kind, probe, probe_kind, DeviceKind};
 
 #[cfg(feature = "device_2x4hd")]
@@ -47,10 +48,8 @@ pub mod m2x4;
 #[cfg(feature = "device_flex")]
 pub mod flex;
 
-/*
-#[cfg(feature = "device_flex_ht")]
-pub mod flexht;
-*/
+#[cfg(feature = "device_flexhtx")]
+pub mod flexhtx;
 
 pub static GENERIC: Device = Device {
     product_name: "Generic",
