@@ -44,6 +44,7 @@ pub(crate) fn output(output: usize) -> Output {
             enable: format!("DGain_{}_0_status", 3 + output),
             gain: Some(format!("DGain_{}_0", 3 + output)),
         },
+        bass_management: None,
         meter: Some(format!("Meter10_C1_{}", 4 + output)),
         delay_addr: Some(format!("Delay_{}_0", 3 + output)),
         invert_addr: format!("polarity_out_{}_0", 1 + output),

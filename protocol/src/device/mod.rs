@@ -47,6 +47,11 @@ pub mod m2x4;
 #[cfg(feature = "device_flex")]
 pub mod flex;
 
+/*
+#[cfg(feature = "device_flex_ht")]
+pub mod flexht;
+*/
+
 pub static GENERIC: Device = Device {
     product_name: "Generic",
     sources: &[],

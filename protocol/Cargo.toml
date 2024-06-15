@@ -2,7 +2,7 @@
 authors = ["Mathieu Rene <mathieu.rene@gmail.com>"]
 edition = "2021"
 name = "minidsp-protocol"
-version = "0.1.9"
+version = "0.1.10"
 license = "Apache-2.0"
 description = "A control interface for some MiniDSP products"
 repository = "https://github.com/mrene/minidsp-rs"
@@ -18,7 +18,20 @@ thiserror = "1.0.56"
 [features]
 debug = ["std"]
 default = ["std", "debug", "symbols", "all_devices"]
-all_devices = ["device_2x4hd", "device_msharc4x8", "device_10x10hd", "device_4x10hd", "device_shd", "device_ddrc24", "device_nanodigi2x8", "device_ddrc88bm", "device_c8x12v2", "device_m2x4", "device_flex"]
+all_devices = [
+    "device_2x4hd",
+    "device_msharc4x8",
+    "device_10x10hd",
+    "device_4x10hd",
+    "device_shd",
+    "device_ddrc24",
+    "device_nanodigi2x8",
+    "device_ddrc88bm",
+    "device_c8x12v2",
+    "device_m2x4",
+    "device_flex",
+    "device_flex_ht",
+]
 device_2x4hd = ["devices"]
 device_4x10hd = ["devices"]
 device_10x10hd = ["devices"]
@@ -30,6 +43,7 @@ device_ddrc88bm = ["devices"]
 device_c8x12v2 = ["devices"]
 device_m2x4 = ["devices"]
 device_flex = ["devices"]
+device_flex_ht = ["devices"]
 devices = []
 std = []
 use_serde = ["std", "serde", "schemars", "strum"]
