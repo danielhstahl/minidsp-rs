@@ -123,6 +123,6 @@ pub fn by_kind(kind: DeviceKind) -> &'static super::Device {
         Flex => &super::flex::DEVICE,
 
         #[cfg(feature = "device_flexhtx")]
-        FlexHt => &super::flex::DEVICE, //TODO add flexhtx device by using codegen
+        FlexHtx => &super::flex::DEVICE, //TODO add flexhtx device by using codegen
     }
 }

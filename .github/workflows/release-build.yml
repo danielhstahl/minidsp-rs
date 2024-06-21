@@ -71,10 +71,10 @@ jobs:
 
     runs-on: ${{ matrix.pair.os }}
     env:
-      CARGO_DEB_VER: 1.35.0
+      CARGO_DEB_VER: 2.3.0
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v4
 
       - uses: actions-rs/toolchain@v1
         with:
@@ -157,7 +157,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build_all, build_rpi]
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v4
 
       - name: Download all artifacts
         uses: actions/download-artifact@v2
