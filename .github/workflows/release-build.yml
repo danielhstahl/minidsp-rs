@@ -131,6 +131,7 @@ jobs:
       - name: List artifacts
         run: |
           ls -R artifacts/**/*
+
       - name: Create release with artifacts
         run: |
           set -x
@@ -139,6 +140,6 @@ jobs:
             assets+=("-a" "$asset")
           done
           TAG="${GITHUB_REF##*/}"
-          hub release create "${assets[@]}" --draft --message "$TAG" "$TAG"
+          gh release create "${assets[@]}" --draft --message "$TAG" "$TAG"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
