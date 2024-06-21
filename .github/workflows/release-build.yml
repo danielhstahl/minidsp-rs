@@ -137,9 +137,9 @@ jobs:
           set -x
           assets=()
           for asset in ./artifacts/*/*.{tar.gz,zip,deb}; do
-            assets+=("-a" "$asset")
+            assets+=("$asset")
           done
           TAG="${GITHUB_REF##*/}"
-          gh release create "${assets[@]}" --draft --message "$TAG" "$TAG"
+          gh release create "${assets[@]}" --draft
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
