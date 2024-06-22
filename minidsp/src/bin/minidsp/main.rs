@@ -133,7 +133,7 @@ impl Opts {
                 .map_err(|_| MiniDSPError::InvalidURL)?;
         } else if let Some(url) = &self.daemon_url {
             builder.with_http(url).await?;
-        } else if let Ok(_result) = hid_option(builder, &self) {
+        } else if let Ok(_result) = hid_option(builder, self) {
         } else {
             #[cfg(target_family = "unix")]
             let _ = builder.with_unix_socket("/tmp/minidsp.sock").await;
