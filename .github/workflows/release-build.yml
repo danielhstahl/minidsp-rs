@@ -8,7 +8,35 @@ on:
 env:
   CARGO_TERM_COLOR: always
 jobs:
-
+  build_rpi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Setup cross environment
+        run: docker build -t rpirust -f scripts/Dockerfile.rpi scripts/
+      - name: Run build
+        run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-armv6hf.sh deb -p minidsp
+      - name: Copy debian package
+        run: |
+          cp -v target/arm-unknown-linux-gnueabihf/debian/${{ matrix.pair.bin }}* .
+      - name: Upload debian package
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: arm-linux-gnueabihf-rpi-deb-artifact
+          path: minidsp*.deb
+          if-no-files-found: error
+      - name: Create binary
+        run: |
+          mkdir archive
+          cp target/arm-unknown-linux-gnueabihf/release/minidsp archive
+          cd archive/
+          tar -czf ../minidsp.arm-linux-gnueabihf-rpi.tar.gz *
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: arm-linux-gnueabihf-rpi-artifact
+          path: minidsp.arm-linux-gnueabihf-rpi.tar.gz
+          if-no-files-found: error
   build_all:
     strategy:
       fail-fast: true
@@ -20,6 +48,14 @@ jobs:
             svc_bin: minidspd
             cross: false
             archive: tar.gz
+
+          - target: x86_64-unknown-linux-musl
+            os: ubuntu-latest
+            bin: minidsp
+            svc_bin: minidspd
+            cross: false
+            archive: tar.gz
+
           - target: x86_64-apple-darwin
             os: macOS-latest
             bin: minidsp
@@ -73,10 +109,18 @@ jobs:
           cargo install cargo-deb --version $CARGO_DEB_VER
 
       - uses: actions-rs/cargo@v1
+        if: ${{ matrix.pair.target != 'x86_64-unknown-linux-musl' }}
         with:
-          use-cross: ${{ matrix.pair.cross }} #aarch64-unknown-linux-gnu
+          use-cross: ${{ matrix.pair.cross }} 
           command: build
           args: --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
+
+      - uses: actions-rs/cargo@v1
+        if: ${{ matrix.pair.target == 'x86_64-unknown-linux-musl' }}
+        with:
+          use-cross: ${{ matrix.pair.cross }} 
+          command: build
+          args: --no-default-features --features serde,strum,schemars,devices --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
 
       - name: Create debian package
         if: runner.os == 'Linux'

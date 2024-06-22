@@ -1,0 +1,19 @@
+FROM ekidd/rust-musl-builder
+
+# Build a static copy of zlib.
+#
+# EXAMPLE ONLY! libz is already included.
+RUN sudo apt-get update
+RUN sudo apt-get install -y autoconf libtool libudev-dev
+WORKDIR /home/rust/libs
+RUN git clone https://github.com/libusb/libusb.git 
+RUN cd libusb && ./autogen.sh
+RUN cd libusb && ls -la
+RUN cd libusb && CC=musl-gcc ./configure --enable-static --disable-shared --prefix=/usr/local/musl
+RUN cd libusb make && sudo make install
+RUN rm -rf libusb
+
+#CMD cargo build --release --bin minidsp --bin minidspd
+
+
+# docker run --rm -it -v "$(pwd)":/home/rust/src ekidd/rust-musl-builder cargo build release
