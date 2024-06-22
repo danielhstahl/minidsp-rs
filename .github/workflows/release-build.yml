@@ -126,7 +126,7 @@ jobs:
         if: runner.os == 'Linux'
         run: |
           cargo deb --target ${{ matrix.pair.target }} -p minidsp --no-build --no-strip
-          cp -v target/${{ matrix.pair.target }}/debian/${{ matrix.pair.bin }}* .
+          cp -v target/${{ matrix.pair.target }}/debian/${{ matrix.pair.bin }}* ${{ matrix.pair.bin }}_${{ matrix.pair.target }}.deb
 
       - name: Upload debian package
         if: runner.os == 'Linux'
