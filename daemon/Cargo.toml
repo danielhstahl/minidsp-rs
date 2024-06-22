@@ -12,7 +12,9 @@ name = "minidspd"
 path = "src/main.rs"
 
 [features]
-default = ["serde", "strum", "schemars"]
+default = ["serde", "strum", "schemars", "hid", "devices"]
+hid = ["minidsp/hid"]
+devices = ["minidsp/devices"]
 
 [dependencies]
 anyhow = "1.0.79"

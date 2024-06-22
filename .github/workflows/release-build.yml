@@ -45,16 +45,10 @@ jobs:
           rustup update stable
 
       - name: Compile
-        if: ${{ (runner.os == 'Linux') && (matrix.target.target != 'x86_64-unknown-linux-musl') }}
-        run: |
-          ./cross build --bin minidsp --bin minidspd --release --target ${{ matrix.target.target }}
-
-      - name: Compile
-        if: ${{ matrix.target.target == 'x86_64-unknown-linux-musl' }}
-        env:
-          CARGO_TARGET_X86_64_UNKNOWN_LINUX_MUSL_RUSTFLAGS: -Ctarget-feature=-crt-static # https://github.com/rust-lang/rust/issues/115430#issuecomment-1736440674
-        run: |
-          ./cross build --bin minidsp --bin minidspd --release --target ${{ matrix.target.target }}
+        if: runner.os == 'Linux'
+        run: | # don't use lusb for now
+          ./cross build --features "serde strum schemars devices" --bin minidspd --release --target ${{ matrix.target.target }}
+          ./cross build --features "devices" --bin minidsp --release --target ${{ matrix.target.target }}
 
       - name: Compile
         if: runner.os == 'Windows'
