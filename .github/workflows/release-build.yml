@@ -50,9 +50,16 @@ jobs:
           ./cross build --bin minidsp --bin minidspd --release --target ${{ matrix.target.target }}
 
       - name: Compile
-        if: runner.os != 'Linux'
+        if: runner.os == 'Windows'
         run: |
           cargo build --bin minidsp --bin minidspd --release --target ${{ matrix.target.target }}
+
+      - name: Compile
+        if: runner.os == 'macOS'
+        run: |
+          rustup target add ${{ matrix.target.target }}
+          cargo build --bin minidsp --bin minidspd --release --target ${{ matrix.target.target }}
+  
 
       # From https://github.com/NLnetLabs/krill/blob/master/.github/workflows/pkg.yml
       # Speed up cargo-deb installation by only re-downloading and re-building its
