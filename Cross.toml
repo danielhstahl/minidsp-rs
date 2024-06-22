@@ -32,3 +32,10 @@ env.passthrough = [
     "PKG_CONFIG_ALL_STATIC=true",
     # "PKG_CONFIG_PATH_x86_64_unknown_linux_musl=/usr/lib/pkgconfig",
 ]
+
+[target.x86_64-unknown-linux-gnu]
+pre-build = [
+    "dpkg --add-architecture $CROSS_DEB_ARCH",
+    "apt-get update",
+    "apt-get install --assume-yes pkg-config build-essential libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
+]
