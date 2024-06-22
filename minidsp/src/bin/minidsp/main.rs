@@ -90,6 +90,24 @@ struct Opts {
     subcmd: Option<SubCommand>,
 }
 
+#[cfg(feature = "hid")]
+fn hid_option(builder: &mut Builder, opts: &Opts) -> Result<bool, MiniDSPError> {
+    if let Some(device) = opts.hid_option.as_ref() {
+        if let Some(ref path) = device.path {
+            builder.with_usb_path(path);
+        } else if let Some((vid, pid)) = device.id {
+            builder.with_usb_product_id(vid, pid)?;
+        }
+        Ok(true)
+    } else {
+        Ok(false)
+    }
+}
+#[cfg(not(feature = "hid"))]
+fn hid_option(_builder: &mut Builder, _opts: &Opts) -> Result<bool, MiniDSPError> {
+    Ok(false)
+}
+
 impl Opts {
     // Applies transport and logging options to this builder
     async fn apply_builder(&self, builder: &mut Builder) -> Result<(), MiniDSPError> {
@@ -115,15 +133,11 @@ impl Opts {
                 .map_err(|_| MiniDSPError::InvalidURL)?;
         } else if let Some(url) = &self.daemon_url {
             builder.with_http(url).await?;
-        } else if let Some(device) = self.hid_option.as_ref() {
-            if let Some(ref path) = device.path {
-                builder.with_usb_path(path);
-            } else if let Some((vid, pid)) = device.id {
-                builder.with_usb_product_id(vid, pid)?;
-            }
+        } else if let Ok(_result) = hid_option(builder, &self) {
         } else {
             #[cfg(target_family = "unix")]
             let _ = builder.with_unix_socket("/tmp/minidsp.sock").await;
+            #[cfg(feature = "hid")]
             let _ = builder.with_default_usb();
         }
 
