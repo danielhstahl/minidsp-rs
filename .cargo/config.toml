@@ -3,11 +3,3 @@ rustflags = ["-Ctarget-feature=+crt-static"]
 
 [target.i686-pc-windows-msvc]
 rustflags = ["-Ctarget-feature=+crt-static"]
-
-#[target.armv7-unknown-linux-gnueabihf]
-#linker = "gcc-sysroot"
-#strip = { path = "arm-linux-gnueabihf-strip" }
-#objcopy = { path = "arm-linux-gnueabihf-objcopy" }
-
-[target.armv7-unknown-linux-gnueabihf]
-linker = "arm-linux-gnueabihf-gcc"
