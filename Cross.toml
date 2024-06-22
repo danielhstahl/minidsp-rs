@@ -2,26 +2,29 @@
 pre-build = [
     "dpkg --add-architecture $CROSS_DEB_ARCH",
     "apt-get update",
-    "apt-get install --assume-yes gcc-multilib:$CROSS_DEB_ARCH libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
+    "apt-get install --assume-yes pkg-config libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
 ]
 
 [target.x86_64-unknown-linux-gnu]
 pre-build = [
     "dpkg --add-architecture $CROSS_DEB_ARCH",
     "apt-get update",
-    "apt-get install --assume-yes gcc-multilib:$CROSS_DEB_ARCH libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
+    "apt-get install --assume-yes pkg-config libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
 ]
 
 [target.armv7-unknown-linux-gnueabihf]
 pre-build = [
     "dpkg --add-architecture $CROSS_DEB_ARCH",
     "apt-get update",
-    "apt-get install --assume-yes gcc-multilib:$CROSS_DEB_ARCH libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
+    "apt-get install --assume-yes pkg-config libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
 ]
 
 [target.x86_64-unknown-linux-musl]
 pre-build = [
     "dpkg --add-architecture $CROSS_DEB_ARCH",
     "apt-get update",
-    "apt-get install --assume-yes gcc-multilib libusb-1.0-0  libusb-1.0-0-dev",
+    "apt-get install --assume-yes pkg-config libusb-1.0-0  libusb-1.0-0-dev",
 ]
+env.passthrough = [
+    "RUSTFLAGS=\"-Ctarget-feature=-crt-static\"",
+] # https://github.com/rust-lang/rust/issues/115430#issuecomment-1736440674
