@@ -4,6 +4,7 @@ pre-build = [
     "apt-get update",
     "apt-get install --assume-yes libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
 ]
+zig = true
 
 [target.x86_64-unknown-linux-gnu]
 pre-build = [
@@ -11,6 +12,7 @@ pre-build = [
     "apt-get update",
     "apt-get install --assume-yes libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
 ]
+zig = true
 
 [target.armv7-unknown-linux-gnueabihf]
 pre-build = [
@@ -18,10 +20,11 @@ pre-build = [
     "apt-get update",
     "apt-get install --assume-yes libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
 ]
+zig = true
 
 [target.x86_64-unknown-linux-musl]
 pre-build = [
     "dpkg --add-architecture $CROSS_DEB_ARCH",
     "apt-get update",
-    "apt-get install --assume-yes libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
+    "apt-get install --assume-yes libusb-1.0-0  libusb-1.0-0-dev",
 ]
