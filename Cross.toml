@@ -12,6 +12,7 @@ pre-build = [
     "apt-get update",
     "apt-get install --assume-yes pkg-config build-essential libusb-1.0-0:$CROSS_DEB_ARCH  libusb-1.0-0-dev:$CROSS_DEB_ARCH",
     "echo $PKG_CONFIG_LIBDIR",
+    "echo $LIBRARY_PATH",
 ]
 #env.passthrough = ["PKG_CONFIG_LIBDIR=/usr/lib/$CROSS_DEB_ARCH/pkgconfig"]
 
