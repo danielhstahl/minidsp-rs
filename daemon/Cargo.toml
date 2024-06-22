@@ -6,15 +6,15 @@ version = "0.1.9"
 license = "Apache-2.0"
 description = "A control interface for some MiniDSP products"
 repository = "https://github.com/mrene/minidsp-rs"
+resolver = "2"
 
 [[bin]]
 name = "minidspd"
 path = "src/main.rs"
 
 [features]
-default = ["serde", "strum", "schemars", "hid", "devices"]
-hid = ["minidsp/hid"]
-devices = ["minidsp/devices"]
+default = ["serde", "strum", "schemars"]
+
 
 [dependencies]
 anyhow = "1.0.79"

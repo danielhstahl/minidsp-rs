@@ -6,6 +6,7 @@ version = "0.1.10"
 license = "Apache-2.0"
 description = "A control interface for some MiniDSP products"
 repository = "https://github.com/mrene/minidsp-rs"
+resolver = "2"
 
 [dependencies]
 anyhow = "1.0.79"

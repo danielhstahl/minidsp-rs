@@ -46,9 +46,8 @@ jobs:
 
       - name: Compile
         if: runner.os == 'Linux'
-        run: | # don't use lusb for now
-          ./cross build --features "serde strum schemars devices" --bin minidspd --release --target ${{ matrix.target.target }}
-          ./cross build --features "devices" --bin minidsp --release --target ${{ matrix.target.target }}
+        run: | 
+          ./cross build --bin minidsp --bin minidspd --release --target ${{ matrix.target.target }}
 
       - name: Compile
         if: runner.os == 'Windows'
