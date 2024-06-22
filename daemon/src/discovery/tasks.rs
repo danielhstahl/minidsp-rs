@@ -5,6 +5,7 @@ use futures::{pin_mut, StreamExt};
 use log::warn;
 use minidsp::transport;
 
+#[cfg(feature = "hid")]
 pub async fn hid_discovery_task(register: impl Fn(&str)) -> Result<()> {
     let api = transport::hid::initialize_api()?;
 

@@ -43,6 +43,7 @@ impl DeviceManager {
 
         {
             // Start tasks for discovery processes
+            #[cfg(feature = "hid")]
             let discovery_hid = {
                 let inner = inner.clone();
                 tokio::spawn(
@@ -54,6 +55,7 @@ impl DeviceManager {
                 )
                 .into()
             };
+            #[cfg(feature = "hid")]
             handles.push(discovery_hid);
 
             if !ignore_advertisements {
