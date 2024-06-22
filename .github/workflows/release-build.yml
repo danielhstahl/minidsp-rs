@@ -41,22 +41,24 @@ jobs:
       - name: Install Rust
         if: runner.os == 'Linux'
         run: |
-          curl -L https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz -o cross-x86_64-unknown-linux-gnu.tar.gz
-          tar -xvzf cross-x86_64-unknown-linux-gnu.tar.gz
+          # curl -L https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz -o cross-x86_64-unknown-linux-gnu.tar.gz
+          # tar -xvzf cross-x86_64-unknown-linux-gnu.tar.gz
           rustup update stable
-
-          DEBIAN_FRONTEND=noninteractive apt-get install -y clang-13
+          sudo apt-get update
+          sudo apt-get install -y libusb-1.0-0  libusb-1.0-0-dev
+          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y clang-13
 
           # Clang is installed with a prefix, which is not what we want
-          ln -s /usr/bin/clang-13 /usr/bin/clang
+          sudo ln -s /usr/bin/clang-13 /usr/bin/clang
           clang --version
 
           # Install mold
           curl -L -o mold.tar.gz https://github.com/rui314/mold/releases/download/v2.1.0/mold-2.1.0-x86_64-linux.tar.gz
           echo "67a479bf2eddf10dd223e488ceedddca49174f629f7a4bbaeaab80c5b5702021 mold.tar.gz"|sha256sum --check --status
-          tar -xz --strip-components=1 -C /usr/ -f mold.tar.gz
+          sudo tar -xz --strip-components=1 -C /usr/ -f mold.tar.gz
           rm mold.tar.gz
           mold --version
+          
 
       #- name: Compile
       #  if: runner.os == 'Linux'
