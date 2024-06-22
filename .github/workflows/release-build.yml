@@ -11,49 +11,48 @@ jobs:
 
   build_all:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
-        pair:
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            bin: minidsp
-            svc_bin: minidspd
-            cross: false
-            archive: tar.gz
-          - target: x86_64-apple-darwin
-            os: macOS-latest
-            bin: minidsp
-            svc_bin: minidspd
-            cross: false
-            archive: tar.gz
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
-            bin: minidsp.exe
-            svc_bin: minidspd.exe
-            cross: false
-            archive: zip
-
-    runs-on: ${{ matrix.pair.os }}
+        target: 
+        - target: x86_64-unknown-linux-musl
+          os: ubuntu-latest
+          archive: tar.gz
+        - target: x86_64-unknown-linux-gnu
+          os: ubuntu-latest
+          archive: tar.gz
+        - target: armv7-unknown-linux-gnueabihf
+          os: ubuntu-latest
+          archive: tar.gz
+        - target: aarch64-unknown-linux-gnu
+          os: ubuntu-latest
+          archive: tar.gz
+        - target: x86_64-pc-windows-msvc
+          os: windows-latest
+          archive: zip
+        - target: x86_64-apple-darwin
+          os: macOS-latest
+          archive: tar.gz
+    runs-on: ${{ matrix.target.os }}
     env:
       CARGO_DEB_VER: 2.3.0
-
     steps:
       - uses: actions/checkout@v4
-
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: ${{ matrix.pair.target }}
-          override: true
-
-      - name: Install native packages
-        if: runner.os == 'Linux' && matrix.pair.cross == false
-        run: sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev
-
-      - name: Build cross image
-        if: runner.os == 'Linux' && matrix.pair.cross == true
+      - name: Install Rust
         run: |
-          docker build -t ${{ matrix.pair.cross_image }} -f scripts/${{ matrix.pair.cross_dockerfile }} scripts/
+          curl -L https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz -o cross-x86_64-unknown-linux-gnu.tar.gz
+          tar -xvzf cross-x86_64-unknown-linux-gnu.tar.gz
+          rustup update stable
+
+      - name: Compile
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev
+          ./cross build --bin minidsp --bin minidspd --release --target ${{ matrix.target.target }}
+
+      - name: Compile
+        if: runner.os != 'Linux'
+        run: |
+          cargo build --bin minidsp --bin minidspd --release --target ${{ matrix.target.target }}
 
       # From https://github.com/NLnetLabs/krill/blob/master/.github/workflows/pkg.yml
       # Speed up cargo-deb installation by only re-downloading and re-building its
@@ -64,7 +63,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: ~/.cargo/bin/cargo-deb
-          key: ${{ matrix.pair.target }}-cargo-deb-${{ env.CARGO_DEB_VER }}
+          key: ${{ matrix.target.target }}-cargo-deb-${{ env.CARGO_DEB_VER }}
 
       # Only install cargo-deb if not already fetched from the cache.
       - name: Install Cargo Deb
@@ -72,49 +71,43 @@ jobs:
         run: |
           cargo install cargo-deb --version $CARGO_DEB_VER
 
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.pair.cross }} #aarch64-unknown-linux-gnu
-          command: build
-          args: --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
-
       - name: Create debian package
         if: runner.os == 'Linux'
         run: |
-          cargo deb --target ${{ matrix.pair.target }} -p minidsp --no-build --no-strip
-          cp -v target/${{ matrix.pair.target }}/debian/${{ matrix.pair.bin }}* .
+          cargo deb --target ${{ matrix.target.target }} -p minidsp --no-build --no-strip
+          cp -v target/${{ matrix.target.target }}/debian/${{ matrix.target.bin }}* .
 
       - name: Upload debian package
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v2.2.1
         with:
-          name: ${{ matrix.pair.target }}-deb
+          name: ${{ matrix.target.target }}-deb
           path: minidsp*.deb
           if-no-files-found: error
 
       - name: Create binary
-        if: matrix.pair.archive == 'tar.gz'
+        if: matrix.target.archive == 'tar.gz'
         run: |
           mkdir archive
-          cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.bin }} archive
-          cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.svc_bin }} archive
+          cp target/${{ matrix.target.target }}/release/minidsp archive
+          cp target/${{ matrix.target.target }}/release/minidspd archive
           cd archive/
-          tar -czf ../minidsp.${{ matrix.pair.target }}.tar.gz *
+          tar -czf ../minidsp.${{ matrix.target.target }}.tar.gz *
 
       - name: Create binary
-        if: matrix.pair.archive == 'zip'
+        if: matrix.target.archive == 'zip'
         run: |
           mkdir archive
-          cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.bin }} archive
-          cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.svc_bin }} archive
+          cp target/${{ matrix.target.target }}/release/minidsp.exe archive
+          cp target/${{ matrix.target.target }}/release/minidspd.exe archive
           cd archive/
-          compress-archive -Path *.exe -DestinationPath ../minidsp.${{ matrix.pair.target }}.zip
+          compress-archive -Path *.exe -DestinationPath ../minidsp.${{ matrix.target.target }}.zip
 
       - name: Upload artifact
         uses: actions/upload-artifact@v2.2.1
         with:
-          name: ${{ matrix.pair.target }}-artifact
-          path: minidsp.${{ matrix.pair.target }}.${{ matrix.pair.archive }}
+          name: ${{ matrix.target.target }}-artifact
+          path: minidsp.${{ matrix.target.target }}.${{ matrix.target.archive }}
           if-no-files-found: error
 
   release:
