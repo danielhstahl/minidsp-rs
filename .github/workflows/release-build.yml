@@ -46,11 +46,11 @@ jobs:
           rustup update stable
           sudo apt-get update
           sudo apt-get install -y libusb-1.0-0  libusb-1.0-0-dev
-          DEBIAN_FRONTEND=noninteractive sudo apt-get install -y clang-13
+          # DEBIAN_FRONTEND=noninteractive sudo apt-get install -y clang-13
 
           # Clang is installed with a prefix, which is not what we want
-          sudo ln -s /usr/bin/clang-13 /usr/bin/clang
-          clang --version
+          # sudo ln -s /usr/bin/clang-13 /usr/bin/clang
+          # clang --version
 
           # Install mold
           curl -L -o mold.tar.gz https://github.com/rui314/mold/releases/download/v2.1.0/mold-2.1.0-x86_64-linux.tar.gz
