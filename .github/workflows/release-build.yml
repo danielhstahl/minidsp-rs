@@ -18,7 +18,7 @@ jobs:
         run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-armv6hf.sh deb -p minidsp
       - name: Copy debian package
         run: |
-          cp -v target/arm-unknown-linux-gnueabihf/debian/minidsp* minidsp_armvhf.deb
+          cp -v target/arm-unknown-linux-gnueabihf/debian/minidsp* ./minidsp_armvhf.deb
       - name: Upload debian package
         uses: actions/upload-artifact@v2.2.1
         with:
@@ -47,7 +47,7 @@ jobs:
         run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-arm64.sh deb -p minidsp
       - name: Copy debian package
         run: |
-          cp -v target/arm64-unknown-linux-gnueabihf/debian/minidsp* minidsp_arm64.deb
+          cp -v target/arm64-unknown-linux-gnueabihf/debian/minidsp* ./minidsp_arm64.deb
       - name: Upload debian package
         uses: actions/upload-artifact@v2.2.1
         with:
@@ -78,6 +78,15 @@ jobs:
             cross: false
             archive: tar.gz
 
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-latest
+            bin: minidsp
+            svc_bin: minidspd
+            cross: true
+            cross_image: local/aarch64-unknown-linux-gnu-0.2.5
+            cross_dockerfile: Dockerfile.aarch64
+            archive: tar.gz
+
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
             bin: minidsp
@@ -91,6 +100,7 @@ jobs:
             svc_bin: minidspd
             cross: false
             archive: tar.gz
+
           - target: x86_64-pc-windows-msvc
             os: windows-latest
             bin: minidsp.exe
