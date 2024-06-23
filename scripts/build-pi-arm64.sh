@@ -36,7 +36,7 @@ export PKG_CONFIG_SYSROOT_DIR=$SYSROOT
 export PKG_CONFIG_ALL_STATIC=on
 
 # Link the compiler
-export TARGET_CC="$GCC/armv7-linux-gnueabihf-gcc"
+export TARGET_CC="$GCC/arm64-linux-gnueabihf-gcc"
 
 # Create wrapper around gcc to point to rpi sysroot
 echo -e '#!/bin/bash' "\n$TARGET_CC --sysroot $SYSROOT \"\$@\"" > $GCC_SYSROOT
@@ -57,7 +57,7 @@ fi
 mkdir -p ~/.cargo/
 
 # point cargo to use gcc wrapper as linker
-echo -e '[target.armv7-unknown-linux-gnueabihf]\nlinker = "gcc-sysroot"\nstrip = { path = "arm-linux-gnueabihf-strip" }\nobjcopy = { path = "arm-linux-gnueabihf-objcopy" }' > ~/.cargo/config.toml
+echo -e '[target.arm64-unknown-linux-gnueabihf]\nlinker = "gcc-sysroot"\nstrip = { path = "arm64-linux-gnueabihf-strip" }\nobjcopy = { path = "arm64-linux-gnueabihf-objcopy" }' > ~/.cargo/config.toml
 
 # Somehow .cargo/config.toml's linker settings are ignored
 export RUSTFLAGS="-C linker=gcc-sysroot"
@@ -75,5 +75,5 @@ CMD=$1
 shift
 
 # Build
-cargo $CMD --target armv7-unknown-linux-gnueabihf "$@"
+cargo $CMD --target arm64-unknown-linux-gnueabihf "$@"
 
