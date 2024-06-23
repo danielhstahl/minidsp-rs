@@ -18,7 +18,7 @@ jobs:
         run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-armv6hf.sh deb -p minidsp
       - name: Copy debian package
         run: |
-          cp -v target/arm-unknown-linux-gnueabihf/debian/${{ matrix.pair.bin }}* .
+          cp -v target/arm-unknown-linux-gnueabihf/debian/minidsp* .
       - name: Upload debian package
         uses: actions/upload-artifact@v2.2.1
         with:
@@ -36,6 +36,35 @@ jobs:
         with:
           name: arm-linux-gnueabihf-rpi-artifact
           path: minidsp.arm-linux-gnueabihf-rpi.tar.gz
+          if-no-files-found: error
+  build_rpi_64:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Setup cross environment
+        run: docker build -t rpirust -f scripts/Dockerfile.rpi_64 scripts/
+      - name: Run build
+        run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-armv7hf.sh deb -p minidsp
+      - name: Copy debian package
+        run: |
+          cp -v target/armv7-unknown-linux-gnueabihf/debian/minidsp* .
+      - name: Upload debian package
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: armv7-linux-gnueabihf-rpi-deb-artifact
+          path: minidsp*.deb
+          if-no-files-found: error
+      - name: Create binary
+        run: |
+          mkdir archive
+          cp target/armv7-unknown-linux-gnueabihf/release/minidsp archive
+          cd archive/
+          tar -czf ../minidsp.armv7-linux-gnueabihf-rpi.tar.gz *
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: armv7-linux-gnueabihf-rpi-artifact
+          path: minidsp.armv7-linux-gnueabihf-rpi.tar.gz
           if-no-files-found: error
   build_all:
     strategy:
