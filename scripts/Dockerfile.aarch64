@@ -3,4 +3,5 @@ RUN dpkg --add-architecture arm64 && apt-get update && apt-get install -y libusb
 RUN ldconfig /lib/aarch64-linux-gnu/
 ENV PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/pkgconfig
 #ENV PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+ENV PKG_CONFIG_ALLOW_CROSS=true
 ENV RUSTFLAGS='-L /lib/aarch64-linux-gnu -L /usr/aarch64-linux-gnu/lib'
