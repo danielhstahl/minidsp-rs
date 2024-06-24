@@ -59,6 +59,15 @@ jobs:
             cross_dockerfile: Dockerfile.aarch64
             archive: tar.gz
 
+          - target: armv7-unknown-linux-gnueabihf
+            os: ubuntu-latest
+            bin: minidsp
+            svc_bin: minidspd
+            cross: true
+            cross_image: local/armv7-unknown-linux-gnueabihf
+            cross_dockerfile: Dockerfile.armv7
+            archive: tar.gz
+
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
             bin: minidsp
