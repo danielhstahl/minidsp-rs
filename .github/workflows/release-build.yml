@@ -142,26 +142,26 @@ jobs:
           command: build
           args: --no-default-features --features serde,strum,schemars,devices --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
 
-      #- name: Create debian package
-      #  if: runner.os == 'Linux'
-      #  run: |
-      #    cargo deb --target ${{ matrix.pair.target }} -p minidsp --no-build --no-strip
-      #    cp -v target/${{ matrix.pair.target }}/debian/${{ matrix.pair.bin }}* ${{ matrix.pair.bin }}_${{ matrix.pair.target }}.deb
+      - name: Create debian package
+        if: runner.os == 'Linux'
+        run: |
+          cargo deb --target ${{ matrix.pair.target }} -p minidsp --no-build --no-strip
+          cp -v target/${{ matrix.pair.target }}/debian/${{ matrix.pair.bin }}* ${{ matrix.pair.bin }}_${{ matrix.pair.target }}.deb
 
-      #- name: Upload debian package
-      #  if: runner.os == 'Linux'
-      #  uses: actions/upload-artifact@v2.2.1
-      #  with:
-      #    name: ${{ matrix.pair.target }}-deb
-      #    path: minidsp*.deb
-      #    if-no-files-found: error
+      - name: Upload debian package
+        if: runner.os == 'Linux'
+        uses: actions/upload-artifact@v2.2.1
+        with:
+          name: ${{ matrix.pair.target }}-deb
+          path: minidsp*.deb
+          if-no-files-found: error
 
       - name: Create binary
         if: matrix.pair.archive == 'tar.gz'
         run: |
           mkdir archive
           cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.bin }} archive
-          # cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.svc_bin }} archive
+          cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.svc_bin }} archive
           cd archive/
           tar -czf ../minidsp.${{ matrix.pair.target }}.tar.gz *
 
@@ -170,7 +170,7 @@ jobs:
         run: |
           mkdir archive
           cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.bin }} archive
-          # cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.svc_bin }} archive
+          cp target/${{ matrix.pair.target }}/release/${{ matrix.pair.svc_bin }} archive
           cd archive/
           compress-archive -Path *.exe -DestinationPath ../minidsp.${{ matrix.pair.target }}.zip
 
