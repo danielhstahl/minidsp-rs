@@ -142,11 +142,11 @@ jobs:
           command: build
           args: --no-default-features --features serde,strum,schemars,devices --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
 
-      - name: Create debian package
-        if: runner.os == 'Linux'
-        run: |
-          cargo deb --target ${{ matrix.pair.target }} -p minidsp --no-build --no-strip
-          cp -v target/${{ matrix.pair.target }}/debian/${{ matrix.pair.bin }}* ${{ matrix.pair.bin }}_${{ matrix.pair.target }}.deb
+      #- name: Create debian package
+      #  if: runner.os == 'Linux'
+      #  run: |
+      #    cargo deb --target ${{ matrix.pair.target }} -p minidsp --no-build --no-strip
+      #    cp -v target/${{ matrix.pair.target }}/debian/${{ matrix.pair.bin }}* ${{ matrix.pair.bin }}_${{ matrix.pair.target }}.deb
 
       - name: Upload debian package
         if: runner.os == 'Linux'
