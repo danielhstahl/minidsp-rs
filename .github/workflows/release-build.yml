@@ -148,13 +148,13 @@ jobs:
       #    cargo deb --target ${{ matrix.pair.target }} -p minidsp --no-build --no-strip
       #    cp -v target/${{ matrix.pair.target }}/debian/${{ matrix.pair.bin }}* ${{ matrix.pair.bin }}_${{ matrix.pair.target }}.deb
 
-      - name: Upload debian package
-        if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v2.2.1
-        with:
-          name: ${{ matrix.pair.target }}-deb
-          path: minidsp*.deb
-          if-no-files-found: error
+      #- name: Upload debian package
+      #  if: runner.os == 'Linux'
+      #  uses: actions/upload-artifact@v2.2.1
+      #  with:
+      #    name: ${{ matrix.pair.target }}-deb
+      #    path: minidsp*.deb
+      #    if-no-files-found: error
 
       - name: Create binary
         if: matrix.pair.archive == 'tar.gz'
