@@ -133,7 +133,7 @@ jobs:
         with:
           use-cross: ${{ matrix.pair.cross }} 
           command: build
-          args: --bin minidsp --release --target ${{ matrix.pair.target }}
+          args: --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
 
       - uses: actions-rs/cargo@v1
         if: ${{ matrix.pair.target == 'x86_64-unknown-linux-musl' }}
