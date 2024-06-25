@@ -55,7 +55,7 @@ hex-literal = "0.4.1"
 default-features = false
 features = ["linux-static-libusb"]
 optional = true
-version = "2.4.1"
+version = "2.6.1"
 
 [dependencies.tokio]
 features = ["rt-multi-thread", "net", "fs", "macros", "io-util"]
