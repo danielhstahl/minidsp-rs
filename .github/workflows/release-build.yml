@@ -136,7 +136,7 @@ jobs:
         if: runner.os == 'Linux' && matrix.pair.cross == true
         run: |
           docker build -t ${{ matrix.pair.cross_image }}-zig -f scripts/${{ matrix.pair.dockerfile }} .
-          docker run --rm -it -v $(pwd):/io -w /io ${{ matrix.pair.cross_image }}-zig cargo zigbuild --release --target ${{ matrix.pair.target }} --bin minidsp --bin minidspd
+          docker run --rm -v $(pwd):/io -w /io ${{ matrix.pair.cross_image }}-zig cargo zigbuild --release --target ${{ matrix.pair.target }} --bin minidsp --bin minidspd
 
       - uses: actions-rs/cargo@v1
         if: ${{ matrix.pair.target != 'x86_64-unknown-linux-musl' }}
