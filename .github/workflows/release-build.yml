@@ -61,12 +61,12 @@ jobs:
             archive: tar.gz
             architecture: arm64
 
-          - target: armv7-unknown-linux-gnueabihf
+          - target: arm-unknown-linux-gnueabihf #armv7-unknown-linux-gnueabihf
             os: ubuntu-latest
             bin: minidsp
             svc_bin: minidspd
             cross: true
-            cross_image: local/armv7-unknown-linux-gnueabihf
+            cross_image: local/arm-unknown-linux-gnueabihf #armv7-unknown-linux-gnueabihf
             cross_dockerfile: Dockerfile.armv7
             dockerfile: Dockerfile.zigarm
             archive: tar.gz

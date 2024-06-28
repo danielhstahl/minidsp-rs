@@ -1,12 +1,12 @@
-FROM rustembedded/cross:armv7-unknown-linux-gnueabihf
+FROM rustembedded/cross:arm-unknown-linux-gnueabihf
 
 ## Remove any existing non armhf libusb
 #RUN apt-get update && apt-get remove libusb-1.0-0 libusb-1.0-0-dev
 RUN dpkg --add-architecture armhf && apt-get update && apt-get install -y libhidapi-dev:armhf libudev-dev:armhf libusb-1.0-0:armhf libusb-1.0-0-dev:armhf gcc-arm-linux-gnueabihf pkg-config
-RUN curl https://ziglang.org/builds/zig-linux-x86_64-0.14.0-dev.130+cb308ba3a.tar.xz -o zig.tar.xz
-RUN mkdir zig
-RUN tar xf zig.tar.xz -C zig --strip-components 1
-ENV PATH="${PATH}:${PWD}/zig"
+#RUN curl https://ziglang.org/builds/zig-linux-x86_64-0.14.0-dev.130+cb308ba3a.tar.xz -o zig.tar.xz
+#RUN mkdir zig
+#RUN tar xf zig.tar.xz -C zig --strip-components 1
+#ENV PATH="${PATH}:${PWD}/zig"
 
 ENV PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/
 ENV PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig
