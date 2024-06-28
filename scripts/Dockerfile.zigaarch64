@@ -1,0 +1,29 @@
+#FROM rust:1.79.0-buster
+#RUN dpkg --add-architecture armhf && apt-get update && apt-get install -y libhidapi-dev:armhf libudev-dev:armhf libusb-1.0-0:armhf libusb-1.0-0-dev:armhf gcc-arm-linux-gnueabihf pkg-config
+#RUN curl https://ziglang.org/builds/zig-linux-x86_64-0.14.0-dev.130+cb308ba3a.tar.xz -o zig.tar.xz
+#RUN mkdir zig
+#RUN tar xf zig.tar.xz -C zig --strip-components 1
+#ENV PATH="${PATH}:${PWD}/zig"
+
+#ENV PKG_CONFIG_LIBDIR=/usr/lib/arm-linux-gnueabihf/
+#ENV PKG_CONFIG_PATH=/usr/lib/arm-linux-gnueabihf/pkgconfig
+#ENV PKG_CONFIG_SYSROOT_DIR=/
+#ENV PKG_ALLOW_CROSS=1
+#RUN ldconfig
+#RUN cargo install cargo-zigbuild
+#RUN rustup target add armv7-unknown-linux-gnueabihf
+# cargo zigbuild --target ${{ matrix.pair.target }} --release --bin minidsp
+
+# docker run --rm --user "$(id -u)":"$(id -g)" -v "$PWD":/usr/src/myapp -w /usr/src/myapp IMAGEANDTAG cargo zigbuild --release --target armv7-unknown-linux-gnueabihf --bin minidsp
+FROM messense/cargo-zigbuild
+
+RUN dpkg --add-architecture arm64 && apt-get update && apt-get install -y libhidapi-dev:arm64 libudev-dev:arm64 libusb-1.0-0:arm64 libusb-1.0-0-dev:arm64 pkg-config
+ENV PKG_CONFIG_LIBDIR=/usr/lib/aarch64-linux-gnu/
+ENV PKG_CONFIG_PATH=/usr/lib/aarch64-linux-gnu/pkgconfig
+ENV PKG_CONFIG_SYSROOT_DIR=/
+
+#docker run --rm  -v "$PWD":/usr/src/myapp -w /usr/src/myapp zigbuild cargo zigbuild --release --target armv7-unknown-linux-gnueabihf --bin minidsp
+
+
+#docker run --rm -it -v $(pwd):/io -w /io messense/cargo-zigbuild \
+#  cargo zigbuild --release --target arm-unknown-linux-gnueabihf --bin minidsp --bin minidspd

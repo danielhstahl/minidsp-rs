@@ -57,6 +57,7 @@ jobs:
             cross: true
             cross_image: local/aarch64-unknown-linux-gnu
             cross_dockerfile: Dockerfile.aarch64
+            dockerfile: Dockerfile.zigaarch64
             archive: tar.gz
             architecture: arm64
 
@@ -67,6 +68,7 @@ jobs:
             cross: true
             cross_image: local/armv7-unknown-linux-gnueabihf
             cross_dockerfile: Dockerfile.armv7
+            dockerfile: Dockerfile.zigarm
             archive: tar.gz
             architecture: armhf
 
@@ -133,18 +135,8 @@ jobs:
       - name: Test zig
         if: runner.os == 'Linux' && matrix.pair.cross == true
         run: |
-          sudo dpkg --add-architecture ${{ matrix.pair.architecture }}
-          sudo apt-get update
-          sudo apt-get install -y libhidapi-dev:${{ matrix.pair.architecture }} libudev-dev:${{ matrix.pair.architecture }} libusb-1.0-0:${{ matrix.pair.architecture }} libusb-1.0-0-dev:${{ matrix.pair.architecture }} gcc-arm-linux-gnueabihf pkg-config
-          curl https://ziglang.org/builds/zig-linux-x86_64-0.14.0-dev.130+cb308ba3a.tar.xz -o zig.tar.xz
-          
-          mkdir zig
-          tar xf zig.tar.xz -C zig --strip-components 1
-          
-          cargo install cargo-zigbuild
-          rustup target add ${{ matrix.pair.target }}
-          PATH=$PATH:$PWD/zig/ cargo zigbuild --target ${{ matrix.pair.target }} --release --bin minidsp
-
+          docker build -t ${{ matrix.pair.cross_image }}-zig -f scripts/${{ matrix.pair.dockerfile }} .
+          docker run --rm -it -v $(pwd):/io -w /io ${{ matrix.pair.cross_image }}-zig cargo zigbuild --release --target ${{ matrix.pair.target }} --bin minidsp --bin minidspd
 
       - uses: actions-rs/cargo@v1
         if: ${{ matrix.pair.target != 'x86_64-unknown-linux-musl' }}

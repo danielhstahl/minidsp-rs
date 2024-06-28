@@ -5,10 +5,14 @@ rustflags = ["-Ctarget-feature=+crt-static"]
 rustflags = ["-Ctarget-feature=+crt-static"]
 
 
-[target.arm-unknown-linux-gnueabihf]
-linker = "gcc-sysroot"
-strip = { path = "arm-linux-gnueabihf-strip" }
-objcopy = { path = "arm-linux-gnueabihf-objcopy" }
+#[target.arm-unknown-linux-gnueabihf]
+#linker = "gcc-sysroot"
+#strip = { path = "arm-linux-gnueabihf-strip" }
+#objcopy = { path = "arm-linux-gnueabihf-objcopy" }
 
-[target.aarch64-unknown-linux-gnu]
-linker = "aarch64-linux-gnu-g++-12"
+#[target.aarch64-unknown-linux-gnu]
+#rustflags = ["-Ctarget-feature=+crt-static"]
+
+
+#[target.armv7-unknown-linux-gnueabihf]
+#rustflags = ["-Ctarget-feature=+crt-static"]
