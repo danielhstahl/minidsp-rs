@@ -58,6 +58,7 @@ jobs:
             cross_image: local/aarch64-unknown-linux-gnu
             cross_dockerfile: Dockerfile.aarch64
             archive: tar.gz
+            architecture: arm64
 
           - target: armv7-unknown-linux-gnueabihf
             os: ubuntu-latest
@@ -67,6 +68,7 @@ jobs:
             cross_image: local/armv7-unknown-linux-gnueabihf
             cross_dockerfile: Dockerfile.armv7
             archive: tar.gz
+            architecture: armhf
 
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
@@ -127,6 +129,17 @@ jobs:
         if: runner.os == 'Linux' && steps.cache-cargo-deb.outputs.cache-hit != 'true'
         run: |
           cargo install cargo-deb --version $CARGO_DEB_VER
+
+      - name: Test zig
+        if: runner.os == 'Linux' && matrix.pair.cross == true
+        run: |
+          dpkg --add-architecture ${{ matrix.pair.architecture }} && apt-get update && apt-get install -y libhidapi-dev:${{ matrix.pair.architecture }} libudev-dev:${{ matrix.pair.architecture }} libusb-1.0-0:${{ matrix.pair.architecture }} libusb-1.0-0-dev:${{ matrix.pair.architecture }} gcc-arm-linux-gnueabihf pkg-config
+          curl https://ziglang.org/builds/zig-linux-x86_64-0.14.0-dev.130+cb308ba3a.tar.xz -o zig.tar.xz
+          tar xf zig.tar.xz
+          cargo install cargo-zigbuild
+          rustup target add ${{ matrix.pair.target }}
+          cargo zigbuild --target ${{ matrix.pair.target }} --release --bin minidsp
+
 
       - uses: actions-rs/cargo@v1
         if: ${{ matrix.pair.target != 'x86_64-unknown-linux-musl' }}
