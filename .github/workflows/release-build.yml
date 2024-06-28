@@ -136,9 +136,10 @@ jobs:
           dpkg --add-architecture ${{ matrix.pair.architecture }} && apt-get update && apt-get install -y libhidapi-dev:${{ matrix.pair.architecture }} libudev-dev:${{ matrix.pair.architecture }} libusb-1.0-0:${{ matrix.pair.architecture }} libusb-1.0-0-dev:${{ matrix.pair.architecture }} gcc-arm-linux-gnueabihf pkg-config
           curl https://ziglang.org/builds/zig-linux-x86_64-0.14.0-dev.130+cb308ba3a.tar.xz -o zig.tar.xz
           tar xf zig.tar.xz
+          ls
           cargo install cargo-zigbuild
           rustup target add ${{ matrix.pair.target }}
-          cargo zigbuild --target ${{ matrix.pair.target }} --release --bin minidsp
+          PATH=$PATH:$(PWD)/zig/ cargo zigbuild --target ${{ matrix.pair.target }} --release --bin minidsp
 
 
       - uses: actions-rs/cargo@v1
