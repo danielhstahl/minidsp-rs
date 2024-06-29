@@ -53,7 +53,7 @@ hex-literal = "0.4.1"
 
 [dependencies.hidapi]
 default-features = false
-features = ["linux-static-libusb"]
+#features = ["linux-native"] # "linux-static-libusb"
 optional = true
 version = "2.6.1"
 
@@ -70,7 +70,7 @@ hyperlocal = "0.8.0"
 
 [features]
 debug = []
-default = ["hid", "devices", "mock"]
+default = ["hid", "devices", "mock", "hidstatic"]
 device = ["minidsp-protocol/devices", "minidsp-protocol/symbols"]
 devices = [
   "minidsp-protocol/devices",
@@ -78,6 +78,8 @@ devices = [
   "minidsp-protocol/all_devices",
 ]
 hid = ["hidapi"]
+hidstatic = ["hidapi/linux-static-libusb"]
+hidnative = ["hidapi/linux-native"]
 mock = []
 
 [package.metadata.deb]
