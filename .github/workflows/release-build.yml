@@ -100,11 +100,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: ${{ matrix.pair.target }}
-          override: true
+      #- uses: actions-rs/toolchain@v1
+      #  with:
+      #    toolchain: stable
+      #    target: ${{ matrix.pair.target }}
+      #    override: true
 
       - name: Install native packages
         if: runner.os == 'Linux' && matrix.pair.cross == false
@@ -136,22 +136,24 @@ jobs:
         if: runner.os == 'Linux' && matrix.pair.cross == true
         run: |
           docker build -t ${{ matrix.pair.cross_image }}-zig -f scripts/${{ matrix.pair.dockerfile }} .
-          docker run --user "$(id -u)":"$(id -g)" --rm -v $(pwd):/io -w /io ${{ matrix.pair.cross_image }}-zig cargo zigbuild --no-default-features --features serde,strum,schemars,devices,hid,hidnative, --release --target ${{ matrix.pair.target }} --bin minidsp --bin minidspd
+          docker run --rm -v $(pwd):/io -w /io ${{ matrix.pair.cross_image }}-zig cargo zigbuild --no-default-features --features serde,strum,schemars,devices,hid,hidnative, --release --target ${{ matrix.pair.target }} --bin minidsp --bin minidspd
+          sudo chown -R $(id -u):$(id -g) target
 
-      - uses: actions-rs/cargo@v1
+      - name: Compile native targets
         if: ${{ matrix.pair.target != 'x86_64-unknown-linux-musl' &&  matrix.pair.cross == false }}
-        with:
-          use-cross: ${{ matrix.pair.cross }} 
-          command: build
-          args: --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
-
-      - uses: actions-rs/cargo@v1
+        run: |
+          rustup target add ${{ matrix.pair.target }}
+          cargo build --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
+        #with:
+        #  use-cross: ${{ matrix.pair.cross }} 
+        #  command: build
+        #  args: --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
+      - name: Compile musl target
         if: ${{ matrix.pair.target == 'x86_64-unknown-linux-musl' }}
-        with:
-          use-cross: ${{ matrix.pair.cross }} 
-          command: build
-          args: --no-default-features --features serde,strum,schemars,devices --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
-
+        run: |
+          rustup target add ${{ matrix.pair.target }}
+          cargo build --no-default-features --features serde,strum,schemars,devices --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
+      
       - name: Create debian package
         if: runner.os == 'Linux'
         run: |

@@ -11,45 +11,20 @@ jobs:
   rust_tests:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
-      #- uses: actions-rs/toolchain@v1
-      #  with:
-      #    toolchain: stable
-      #    profile: minimal
-      #    components: rustfmt, clippy
+      - uses: actions/checkout@v4
 
       - name: Check formatting
         run: cargo fmt --all -- --check
-        #uses: actions-rs/cargo@v1
-        #with:
-        #  command: fmt
-        #  args: --all -- --check
 
       - name: Install native packages
         run: sudo apt-get install libhidapi-dev libhidapi-libusb0 libusb-1.0-0 libusb-1.0-0-dev
 
-      - name: Check workflow permissions
-        id: check_permissions
-        uses: scherermichael-oss/action-has-permission@1.0.6
-        with:
-          required-permission: write
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Run Clippy
-        #if: steps.check_permissions.outputs.has-permission
-        run: cargo clippy --all-targets --all-features -- -D warnings
-      
-      #- name: Run clippy action to produce annotations
-      #  uses: actions-rs/clippy-check@v1
-      #  if: steps.check_permissions.outputs.has-permission
-      #  with:
-      #    args: --all-targets --all-features -- -D warnings
-      #    token: ${{ secrets.GITHUB_TOKEN }}
 
-      #- name: Run clippy manually without annotations
-        #if: ${{ !steps.check_permissions.outputs.has-permission }}
-      #  run: cargo clippy --all-targets --all-features -- -D warnings
+      - name: Install native packages
+        run: sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev
+
+      - name: Run Clippy
+        run: cargo clippy --all-targets --all-features -- -D warnings
       
       - name: Tests
         run: cargo test --all --all-features
