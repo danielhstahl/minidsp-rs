@@ -17,9 +17,9 @@
 # docker run --rm --user "$(id -u)":"$(id -g)" -v "$PWD":/usr/src/myapp -w /usr/src/myapp IMAGEANDTAG cargo zigbuild --release --target armv7-unknown-linux-gnueabihf --bin minidsp
 FROM messense/cargo-zigbuild
 # libhidapi-dev:armhf 
-RUN dpkg --add-architecture armhf && apt-get update && apt-get install -y cmake libudev-dev:armhf libusb-1.0-0:armhf libusb-1.0-0-dev:armhf pkg-config
-RUN git clone https://github.com/libusb/hidapi.git
-RUN cd hidapi && git checkout d0856c05cecbb1522c24fd2f1ed1e144b001f349 && CC="zig cc -target arm-linux" CXX="zig c++ -target arm-linux" cmake . && make CC="zig cc -target arm-linux" CXX="zig c++ -target arm-linux"  && sudo make install
+RUN dpkg --add-architecture armhf && apt-get update && apt-get install -y libhidapi-dev:armhf libudev-dev:armhf libusb-1.0-0:armhf libusb-1.0-0-dev:armhf pkg-config
+#RUN git clone https://github.com/libusb/hidapi.git
+#RUN cd hidapi && git checkout d0856c05cecbb1522c24fd2f1ed1e144b001f349 && CC="zig cc -target arm-linux" CXX="zig c++ -target arm-linux" cmake . && make CC="zig cc -target arm-linux" CXX="zig c++ -target arm-linux"  && sudo make install
 #RUN git clone https://github.com/libusb/libusb.gitr
 #RUN cd libusb && ./autogen.sh && CC="zig cc" CXX="zig c++" make && sudo make install
 
