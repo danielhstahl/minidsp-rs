@@ -20,7 +20,7 @@ pub type Transport =
 pub mod hid;
 
 #[cfg(feature = "hid")]
-use hidapi::HidError;
+use rusb::Error;
 
 use crate::utils::StreamSink;
 
@@ -40,7 +40,7 @@ pub mod ws;
 pub enum MiniDSPError {
     #[error("An HID error has occurred: {0}")]
     #[cfg(feature = "hid")]
-    HIDError(#[from] HidError),
+    HIDError(#[from] Error),
 
     #[error("IO error: {0}")]
     IOError(#[from] std::io::Error),
@@ -111,9 +111,9 @@ pub async fn open_url(url: &Url2) -> Result<Transport, MiniDSPError> {
     match url.scheme() {
         #[cfg(feature = "hid")]
         "usb" => {
-            let api = hid::initialize_api()?;
-            let api = api.lock().unwrap();
-            Ok(hid::HidTransport::with_url(&api, url)
+            //let api = hid::initialize_api()?;
+            //let api = api.lock().unwrap();
+            Ok(hid::HidTransport::with_url(url)
                 .map_err(MiniDSPError::HIDError)?
                 .into_transport())
         }

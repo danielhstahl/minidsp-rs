@@ -7,13 +7,13 @@ use minidsp::transport;
 
 #[cfg(feature = "hid")]
 pub async fn hid_discovery_task(register: impl Fn(&str)) -> Result<()> {
-    let api = transport::hid::initialize_api()?;
+    //let api = transport::hid::initialize_api()?;
 
     loop {
         log::trace!("discovering");
         {
-            let mut api = api.lock().unwrap();
-            match transport::hid::discover(&mut api) {
+            //let mut api = api.lock().unwrap();
+            match transport::hid::discover() {
                 Ok(devices) => {
                     for device in devices {
                         log::trace!("seen: {:?}", device.to_url());

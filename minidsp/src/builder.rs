@@ -19,6 +19,10 @@ use crate::{
     utils::decoder::Decoder,
     MiniDSP, MiniDSPError,
 };
+//#[cfg(feature = "hid")]
+//use rusb::{
+//    Error
+//};
 
 /// Discovers, probes and instantiate device instances.
 ///
@@ -112,10 +116,10 @@ impl Builder {
 
     /// Add all local devices matching known minidsp vendor and product ids
     #[cfg(feature = "hid")]
-    pub fn with_default_usb(&mut self) -> Result<&mut Self, hid::HidError> {
-        let api = hid::initialize_api()?;
-        let mut api = api.lock().unwrap();
-        self.extend_hid_device(hid::discover(&mut api)?);
+    pub fn with_default_usb(&mut self) -> Result<&mut Self, rusb::Error> {
+        //let api = hid::initialize_api()?;
+        //let mut api = api.lock().unwrap();
+        self.extend_hid_device(hid::discover()?);
         Ok(self)
     }
 
@@ -125,11 +129,11 @@ impl Builder {
         &mut self,
         vid: u16,
         pid: T,
-    ) -> Result<&mut Self, hid::HidError> {
-        let api = hid::initialize_api()?;
-        let mut api = api.lock().unwrap();
+    ) -> Result<&mut Self, rusb::Error> {
+        //let api = hid::initialize_api()?;
+        //let mut api = api.lock().unwrap();
         let pid = pid.into();
-        self.extend_hid_device(hid::discover_with(&mut api, |dev| {
+        self.extend_hid_device(hid::discover_with(|dev| {
             vid == dev.vendor_id() && (pid.is_none() || pid == Some(dev.product_id()))
         })?);
         Ok(self)

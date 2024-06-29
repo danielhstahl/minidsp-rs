@@ -57,6 +57,11 @@ default-features = false
 optional = true
 version = "2.6.1"
 
+[dependencies.rusb]
+optional = true
+version = "0.9"
+
+
 [dependencies.tokio]
 features = ["rt-multi-thread", "net", "fs", "macros", "io-util"]
 version = "1.35.1"
@@ -70,16 +75,16 @@ hyperlocal = "0.8.0"
 
 [features]
 debug = []
-default = ["hid", "devices", "mock", "hidstatic"]
+default = ["hid", "devices", "mock"]
 device = ["minidsp-protocol/devices", "minidsp-protocol/symbols"]
 devices = [
   "minidsp-protocol/devices",
   "minidsp-protocol/symbols",
   "minidsp-protocol/all_devices",
 ]
-hid = ["hidapi"]
-hidstatic = ["hidapi/linux-static-libusb"]
-hidnative = ["hidapi/linux-native"]
+hid = ["rusb"]
+#hidstatic = ["hidapi/linux-static-libusb"]
+#hidnative = ["hidapi/linux-native"]
 mock = []
 
 [package.metadata.deb]

@@ -1,29 +1,25 @@
 //! HID transport for local USB devices
-use std::{
-    collections::HashMap,
-    ops::Deref,
-    sync::{Arc, Mutex},
-};
+use std::collections::HashMap;
 
 use anyhow::Result;
-use atomic_refcell::AtomicRefCell;
 
 use futures::{SinkExt, TryStreamExt};
-pub use hidapi::HidError;
-use hidapi::{HidApi, HidDevice, HidResult};
+//pub use hidapi::HidError;
+//use hidapi::{HidApi, HidDevice, HidResult};
+use rusb::{Device as RusbDevice, DeviceList, Error, GlobalContext};
 use stream::HidStream;
 use url2::Url2;
 
 mod discover;
 mod stream;
-mod wrapper;
+//mod wrapper;
 pub use discover::*;
 
 use super::IntoTransport;
 
 pub const VID_MINIDSP: u16 = 0x2752;
 pub const OLD_MINIDSP_PID: (u16, u16) = (0x04d8, 0x003f);
-
+/*
 static HIDAPI_INSTANCE: AtomicRefCell<Option<Arc<Mutex<HidApi>>>> = AtomicRefCell::new(None);
 
 /// Initializes a global instance of HidApi
@@ -35,26 +31,26 @@ pub fn initialize_api() -> HidResult<Arc<Mutex<HidApi>>> {
     let api = Arc::new(Mutex::new(HidApi::new()?));
     HIDAPI_INSTANCE.borrow_mut().replace(api.clone());
     Ok(api)
-}
+}*/
 
 pub struct HidTransport {
     stream: HidStream,
 }
 
 impl HidTransport {
-    pub fn new(device: HidDevice) -> HidTransport {
+    pub fn new(device: RusbDevice<GlobalContext>) -> HidTransport {
         HidTransport {
             stream: HidStream::new(device),
         }
     }
 
-    pub fn with_url(hid: &HidApi, url: &Url2) -> Result<HidTransport, HidError> {
+    pub fn with_url(url: &Url2) -> Result<HidTransport, Error> {
         // If we have a path, decode it.
-        let path = url.path();
+        /*let path = url.path();
         if !path.is_empty() {
-            let path = urlencoding::decode(path).map_err(|_| HidError::HidApiErrorEmpty)?;
-            return HidTransport::with_path(hid, path.to_string());
-        }
+            let path = urlencoding::decode(path).map_err(|_| Error::InvalidParam)?; // HidError::HidApiErrorEmpty)?;
+            return HidTransport::with_path(path.to_string());
+        }*/
 
         // If it's empty, try to get the vid and pid from the query string
         let query: HashMap<_, _> = url.query_pairs().collect();
@@ -62,28 +58,44 @@ impl HidTransport {
         let pid = query.get("pid");
 
         if let (Some(vid), Some(pid)) = (vid, pid) {
-            let vid = u16::from_str_radix(vid, 16).map_err(|_| HidError::HidApiError {
-                message: "couldn't parse vendor id".to_string(),
-            })?;
-            let pid = u16::from_str_radix(pid, 16).map_err(|_| HidError::HidApiError {
-                message: "couldn't parse product id".to_string(),
-            })?;
-            return HidTransport::with_product_id(hid, vid, pid);
+            let vid = u16::from_str_radix(vid, 16).map_err(|_| Error::InvalidParam)?;
+            let pid = u16::from_str_radix(pid, 16).map_err(|_| Error::InvalidParam)?;
+            return HidTransport::with_product_id(vid, pid);
         }
 
-        Err(HidError::HidApiError {
-            message: "malformed url".to_string(),
-        })
+        Err(Error::InvalidParam)
     }
 
-    pub fn with_path(hid: &HidApi, path: String) -> Result<HidTransport, HidError> {
+    /*pub fn with_path(path: String) -> Result<HidTransport, Error> {
         let path = std::ffi::CString::new(path.into_bytes()).unwrap();
-        Ok(HidTransport::new(hid.open_path(&path)?))
-    }
 
-    pub fn with_product_id(hid: &HidApi, vid: u16, pid: u16) -> Result<HidTransport, HidError> {
-        let hid_device = hid.open(vid, pid)?;
-        Ok(HidTransport::new(hid_device))
+        Ok(HidTransport::new(hid.open_path(&path)?))
+
+
+        let hid_device = DeviceList::new()?
+            .iter()
+            //.flat_map(|d| Ok(d.device_descriptor()?))
+            .find(|d| {
+                d.address()==path.into_bytes()
+            }); //hid.open(vid, pid)?;
+        match hid_device {
+            Some(device) => Ok(HidTransport::new(device)),
+            None => Err(Error::NotFound),
+        }
+    }*/
+
+    pub fn with_product_id(vid: u16, pid: u16) -> Result<HidTransport, Error> {
+        let hid_device = DeviceList::new()?
+            .iter()
+            //.flat_map(|d| Ok(d.device_descriptor()?))
+            .find(|d| {
+                let descriptor = d.device_descriptor().unwrap(); //yuck
+                descriptor.vendor_id() == vid && descriptor.product_id() == pid
+            }); //hid.open(vid, pid)?;
+        match hid_device {
+            Some(device) => Ok(HidTransport::new(device)),
+            None => Err(Error::NotFound),
+        }
     }
 
     pub fn into_inner(self) -> HidStream {

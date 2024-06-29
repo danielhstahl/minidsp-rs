@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - 'dev'
+      - 'feature/switch_to_rusb'
 
 env:
   CARGO_TERM_COLOR: always
@@ -26,10 +27,8 @@ jobs:
             svc_bin: minidspd
             cross: true
             cross_image: local/aarch64-unknown-linux-gnu
-            cross_dockerfile: Dockerfile.aarch64
             dockerfile: Dockerfile.zigaarch64
             archive: tar.gz
-            architecture: arm64
 
           - target: arm-unknown-linux-gnueabihf #armv7-unknown-linux-gnueabihf
             os: ubuntu-latest
@@ -37,10 +36,8 @@ jobs:
             svc_bin: minidspd
             cross: true
             cross_image: local/arm-unknown-linux-gnueabihf #armv7-unknown-linux-gnueabihf
-            cross_dockerfile: Dockerfile.armv7
             dockerfile: Dockerfile.zigarm
             archive: tar.gz
-            architecture: armhf
 
           - target: x86_64-unknown-linux-musl
             os: ubuntu-latest
@@ -70,11 +67,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      #- uses: actions-rs/toolchain@v1
-      #  with:
-      #    toolchain: stable
-      #    target: ${{ matrix.pair.target }}
-      #    override: true
 
       - name: Install native packages
         if: runner.os == 'Linux' && matrix.pair.cross == false
@@ -105,8 +97,8 @@ jobs:
       - name: Cross compile with zig
         if: runner.os == 'Linux' && matrix.pair.cross == true
         run: |
-          docker build -t ${{ matrix.pair.cross_image }}-zig -f scripts/${{ matrix.pair.dockerfile }} .
-          docker run --rm -v $(pwd):/io -w /io ${{ matrix.pair.cross_image }}-zig cargo zigbuild --no-default-features --features serde,strum,schemars,devices,hid,hidnative, --release --target ${{ matrix.pair.target }} --bin minidsp --bin minidspd
+          docker build -t ${{ matrix.pair.cross_image }} -f scripts/${{ matrix.pair.dockerfile }} .
+          docker run --rm -v $(pwd):/io -w /io ${{ matrix.pair.cross_image }} cargo zigbuild --no-default-features --features serde,strum,schemars,devices,hid,hidnative --release --target ${{ matrix.pair.target }} --bin minidsp --bin minidspd
           sudo chown -R $(id -u):$(id -g) target
 
       - name: Compile native targets
@@ -114,10 +106,7 @@ jobs:
         run: |
           rustup target add ${{ matrix.pair.target }}
           cargo build --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
-        #with:
-        #  use-cross: ${{ matrix.pair.cross }} 
-        #  command: build
-        #  args: --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
+
       - name: Compile musl target
         if: ${{ matrix.pair.target == 'x86_64-unknown-linux-musl' }}
         run: |
@@ -132,7 +121,7 @@ jobs:
 
       - name: Upload debian package
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.pair.target }}-deb
           path: minidsp*.deb
@@ -157,7 +146,7 @@ jobs:
           compress-archive -Path *.exe -DestinationPath ../minidsp.${{ matrix.pair.target }}.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.pair.target }}-artifact
           path: minidsp.${{ matrix.pair.target }}.${{ matrix.pair.archive }}

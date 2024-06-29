@@ -3,10 +3,10 @@ use std::{fmt, fmt::Formatter, str::FromStr};
 
 use anyhow::{anyhow, Result};
 use async_trait::async_trait;
-use hidapi::{HidApi, HidError};
-
-use super::{initialize_api, HidTransport, OLD_MINIDSP_PID, VID_MINIDSP};
+//use hidapi::{HidApi, HidError};
+use super::{HidTransport, OLD_MINIDSP_PID, VID_MINIDSP};
 use crate::transport::{IntoTransport, MiniDSPError, Openable, Transport};
+use rusb::{DeviceDescriptor, DeviceList, Error};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Device {
@@ -65,13 +65,14 @@ impl fmt::Display for Device {
 #[async_trait]
 impl Openable for Device {
     async fn open(&self) -> Result<Transport, MiniDSPError> {
-        let hid = initialize_api()?;
-        let hid = hid.lock().unwrap();
+        //let hid = initialize_api()?;
+        //let hid = hid.lock().unwrap();
 
-        if let Some(path) = &self.path {
-            Ok(HidTransport::with_path(&hid, path.to_string())?.into_transport())
+        if let Some(_path) = &self.path {
+            //Ok(HidTransport::with_path(path.to_string())?.into_transport())
+            Err(MiniDSPError::InternalError(anyhow!("path not implemented")))
         } else if let Some((vid, pid)) = &self.id {
-            Ok(HidTransport::with_product_id(&hid, *vid, *pid)?.into_transport())
+            Ok(HidTransport::with_product_id(*vid, *pid)?.into_transport())
         } else {
             Err(MiniDSPError::InternalError(anyhow!(
                 "invalid device, no path or id"
@@ -84,32 +85,46 @@ impl Openable for Device {
     }
 }
 
-pub fn discover(hid: &mut HidApi) -> Result<Vec<Device>, HidError> {
-    hid.refresh_devices()?;
+pub fn discover() -> Result<Vec<Device>, Error> {
+    //hid.refresh_devices()?;
 
-    Ok(hid
-        .device_list()
-        .filter(|di| {
-            di.vendor_id() == VID_MINIDSP || (di.vendor_id(), di.product_id()) == OLD_MINIDSP_PID
+    Ok(DeviceList::new()?
+        .iter()
+        .map(|d| -> Result<(DeviceDescriptor, u8), Error> {
+            let descriptor = d.device_descriptor()?;
+            let address = d.address();
+            Ok((descriptor, address))
         })
-        .map(|di| Device {
-            id: Some((di.vendor_id(), di.product_id())),
-            path: Some(di.path().to_string_lossy().to_string()),
+        .flatten()
+        .filter(|(descriptor, _address)| {
+            //let (descriptor, address) = device?;
+            let vendor_id = descriptor.vendor_id();
+            let product_id = descriptor.product_id();
+            vendor_id == VID_MINIDSP || (vendor_id, product_id) == OLD_MINIDSP_PID
+        })
+        .map(|(descriptor, address)| Device {
+            id: Some((descriptor.vendor_id(), descriptor.product_id())),
+            path: Some(address.to_string()),
         })
         .collect())
 }
 
-pub fn discover_with<F: Fn(&hidapi::DeviceInfo) -> bool>(
-    hid: &mut HidApi,
-    func: F,
-) -> Result<Vec<Device>, HidError> {
-    hid.refresh_devices()?;
-    Ok(hid
-        .device_list()
-        .filter(|di| func(di))
-        .map(|di| Device {
-            id: Some((di.vendor_id(), di.product_id())),
-            path: Some(di.path().to_string_lossy().to_string()),
+pub fn discover_with<F: Fn(&DeviceDescriptor) -> bool>(func: F) -> Result<Vec<Device>, Error> {
+    Ok(DeviceList::new()?
+        .iter()
+        .map(|d| -> Result<(DeviceDescriptor, u8), Error> {
+            let descriptor = d.device_descriptor()?;
+            let address = d.address();
+            Ok((descriptor, address))
+        })
+        .flatten()
+        .filter(|(descriptor, _address)| {
+            //let (descriptor, address) = device?;
+            func(descriptor)
+        })
+        .map(|(descriptor, address)| Device {
+            id: Some((descriptor.vendor_id(), descriptor.product_id())),
+            path: Some(address.to_string()),
         })
         .collect())
 }
