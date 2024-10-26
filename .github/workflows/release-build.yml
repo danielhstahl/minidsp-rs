@@ -45,12 +45,12 @@ jobs:
       fail-fast: false
       matrix:
         pair:
-          - target: x86_64-unknown-linux-gnu
-            os: ubuntu-latest
-            bin: minidsp
-            svc_bin: minidspd
-            cross: false
-            archive: tar.gz
+          # - target: x86_64-unknown-linux-gnu
+          #   os: ubuntu-latest
+          #   bin: minidsp
+          #   svc_bin: minidspd
+          #   cross: false
+          #   archive: tar.gz
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             bin: minidsp
@@ -58,18 +58,18 @@ jobs:
             cross: true
             cross_dockerfile: Dockerfile.aarch64
             archive: tar.gz
-          - target: x86_64-apple-darwin
-            os: macOS-latest
-            bin: minidsp
-            svc_bin: minidspd
-            cross: false
-            archive: tar.gz
-          - target: x86_64-pc-windows-msvc
-            os: windows-latest
-            bin: minidsp.exe
-            svc_bin: minidspd.exe
-            cross: false
-            archive: zip
+          # - target: x86_64-apple-darwin
+          #   os: macOS-latest
+          #   bin: minidsp
+          #   svc_bin: minidspd
+          #   cross: false
+          #   archive: tar.gz
+          # - target: x86_64-pc-windows-msvc
+          #   os: windows-latest
+          #   bin: minidsp.exe
+          #   svc_bin: minidspd.exe
+          #   cross: false
+          #   archive: zip
 
     runs-on: ${{ matrix.pair.os }}
     env:
@@ -88,7 +88,7 @@ jobs:
         run: |
           curl -L -o /tmp/cross.tar.gz https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz
           cd /usr/local/bin
-          tar -zxvf /tmp/cross.tar.gz          
+          tar -zxvf /tmp/cross.tar.gz
 
       - name: Install native packages
         if: runner.os == 'Linux' && matrix.pair.cross == false
