@@ -60,7 +60,7 @@ jobs:
             archive: tar.gz
             command: cross
           - target: x86_64-apple-darwin
-            os: macOS-latest
+            os: macos-13
             bin: minidsp
             svc_bin: minidspd
             cross: false
@@ -72,6 +72,13 @@ jobs:
             svc_bin: minidspd.exe
             cross: false
             archive: zip
+            command: cargo
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            bin: minidsp
+            svc_bin: minidspd
+            cross: false
+            archive: tar.gz
             command: cargo
 
     runs-on: ${{ matrix.pair.os }}
@@ -178,6 +185,6 @@ jobs:
             assets+=("-a" "$asset")
           done
           TAG="${GITHUB_REF##*/}"
-          hub release create "${assets[@]}" --draft --message "$TAG" "$TAG"
+          gh release create "${assets[@]}" --draft --notes "$TAG" "$TAG"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
