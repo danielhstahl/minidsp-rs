@@ -129,8 +129,8 @@ async fn get_master_status(req: Request<Body>) -> Result<Response<Body>, Error> 
     let app = app.read().await;
     let device = get_device_instance(&app, device_index)?;
     let mut status = StatusSummary::fetch(&device).await?;
-    let query_levels = req.query("levels").map(Clone::clone);
-    let query_poll = req.query("poll").map(Clone::clone);
+    let query_levels = req.query("levels").cloned();
+    let query_poll = req.query("poll").cloned();
 
     if hyper_tungstenite::is_upgrade_request(&req) {
         let (response, websocket) =

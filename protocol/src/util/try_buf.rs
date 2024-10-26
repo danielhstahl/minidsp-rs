@@ -32,6 +32,7 @@ pub enum TryBufError {
     InvalidLength { remaining: usize, required: usize },
 }
 
+#[allow(dead_code)]
 pub trait TryBuf {
     try_def!(try_get_u8, u8);
     try_def!(try_get_i8, i8);
