@@ -11,65 +11,68 @@ on:
 env:
   CARGO_TERM_COLOR: always
 jobs:
-  # build_rpi:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #     - name: Setup cross environment
-  #       run: docker build -t rpirust -f scripts/Dockerfile.rpi scripts/
-  #     - name: Run build
-  #       run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-armv6hf.sh deb -p minidsp
-  #     - name: Copy debian package
-  #       run: |
-  #         cp -v target/arm-unknown-linux-gnueabihf/debian/${{ matrix.pair.bin }}* .
-  #     - name: Upload debian package
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: arm-linux-gnueabihf-rpi-deb-artifact
-  #         path: minidsp*.deb
-  #         if-no-files-found: error
-  #     - name: Create binary
-  #       run: |
-  #         mkdir archive
-  #         cp target/arm-unknown-linux-gnueabihf/release/minidsp archive
-  #         cd archive/
-  #         tar -czf ../minidsp.arm-linux-gnueabihf-rpi.tar.gz *
-  #     - name: Upload artifact
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: arm-linux-gnueabihf-rpi-artifact
-  #         path: minidsp.arm-linux-gnueabihf-rpi.tar.gz
-  #         if-no-files-found: error
+  build_rpi:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup cross environment
+        run: docker build -t rpirust -f scripts/Dockerfile.rpi scripts/
+      - name: Run build
+        run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-armv6hf.sh deb -p minidsp
+      - name: Copy debian package
+        run: |
+          cp -v target/arm-unknown-linux-gnueabihf/debian/${{ matrix.pair.bin }}* .
+      - name: Upload debian package
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm-linux-gnueabihf-rpi-deb-artifact
+          path: minidsp*.deb
+          if-no-files-found: error
+      - name: Create binary
+        run: |
+          mkdir archive
+          cp target/arm-unknown-linux-gnueabihf/release/minidsp archive
+          cd archive/
+          tar -czf ../minidsp.arm-linux-gnueabihf-rpi.tar.gz *
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: arm-linux-gnueabihf-rpi-artifact
+          path: minidsp.arm-linux-gnueabihf-rpi.tar.gz
+          if-no-files-found: error
   build_all:
     strategy:
       fail-fast: false
       matrix:
         pair:
-          # - target: x86_64-unknown-linux-gnu
-          #   os: ubuntu-latest
-          #   bin: minidsp
-          #   svc_bin: minidspd
-          #   cross: false
-          #   archive: tar.gz
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            bin: minidsp
+            svc_bin: minidspd
+            cross: false
+            archive: tar.gz
+            command: cargo
           - target: aarch64-unknown-linux-gnu
             os: ubuntu-latest
             bin: minidsp
             svc_bin: minidspd
             cross: true
-            cross_dockerfile: Dockerfile.aarch64
             archive: tar.gz
-          # - target: x86_64-apple-darwin
-          #   os: macOS-latest
-          #   bin: minidsp
-          #   svc_bin: minidspd
-          #   cross: false
-          #   archive: tar.gz
-          # - target: x86_64-pc-windows-msvc
-          #   os: windows-latest
-          #   bin: minidsp.exe
-          #   svc_bin: minidspd.exe
-          #   cross: false
-          #   archive: zip
+            command: cross
+          - target: x86_64-apple-darwin
+            os: macOS-latest
+            bin: minidsp
+            svc_bin: minidspd
+            cross: false
+            archive: tar.gz
+            command: cargo
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            bin: minidsp.exe
+            svc_bin: minidspd.exe
+            cross: false
+            archive: zip
+            command: cargo
 
     runs-on: ${{ matrix.pair.os }}
     env:
@@ -97,14 +100,6 @@ jobs:
       # From https://github.com/NLnetLabs/krill/blob/master/.github/workflows/pkg.yml
       # Speed up cargo-deb installation by only re-downloading and re-building its
       # dependent crates if we change the version of cargo-deb that we are using.
-      # - name: Cache Cross binary
-      #   if: runner.os == 'Linux'
-      #   id: cache-cargo-cross
-      #   uses: actions/cache@v4
-      #   with:
-      #     path: ~/.cargo/bin/deb
-      #     key: ${{ matrix.pair.target }}-cargo-deb-${{ env.CARGO_DEB_VER }}
-
       - name: Cache Cargo Deb binary
         if: runner.os == 'Linux'
         id: cache-cargo-deb
@@ -114,7 +109,7 @@ jobs:
           key: ${{ matrix.pair.target }}-cargo-deb-${{ env.CARGO_DEB_VER }}
 
       - run: |
-          cross build --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
+          ${{ matrix.pair.command }} build --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
 
       # Only install cargo-deb if not already fetched from the cache.
       - name: Install Cargo Deb
