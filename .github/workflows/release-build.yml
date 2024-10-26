@@ -3,7 +3,7 @@ name: Release build
 on:
   push:
     branches:
-      - 'fix/flex-config-apply'
+      - 'bump-deps'
     tags:
       - 'v0.*'
       - 'v1.*'
@@ -11,38 +11,38 @@ on:
 env:
   CARGO_TERM_COLOR: always
 jobs:
-  build_rpi:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2.3.4
-      - name: Setup cross environment
-        run: docker build -t rpirust -f scripts/Dockerfile.rpi scripts/
-      - name: Run build
-        run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-armv6hf.sh deb -p minidsp
-      - name: Copy debian package
-        run: |
-          cp -v target/arm-unknown-linux-gnueabihf/debian/${{ matrix.pair.bin }}* .
-      - name: Upload debian package
-        uses: actions/upload-artifact@v2.2.1
-        with:
-          name: arm-linux-gnueabihf-rpi-deb-artifact
-          path: minidsp*.deb
-          if-no-files-found: error
-      - name: Create binary
-        run: |
-          mkdir archive
-          cp target/arm-unknown-linux-gnueabihf/release/minidsp archive
-          cd archive/
-          tar -czf ../minidsp.arm-linux-gnueabihf-rpi.tar.gz *
-      - name: Upload artifact
-        uses: actions/upload-artifact@v2.2.1
-        with:
-          name: arm-linux-gnueabihf-rpi-artifact
-          path: minidsp.arm-linux-gnueabihf-rpi.tar.gz
-          if-no-files-found: error
+  # build_rpi:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #     - name: Setup cross environment
+  #       run: docker build -t rpirust -f scripts/Dockerfile.rpi scripts/
+  #     - name: Run build
+  #       run: docker run --rm -v $(pwd):/src -w /src rpirust ./scripts/build-pi-armv6hf.sh deb -p minidsp
+  #     - name: Copy debian package
+  #       run: |
+  #         cp -v target/arm-unknown-linux-gnueabihf/debian/${{ matrix.pair.bin }}* .
+  #     - name: Upload debian package
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: arm-linux-gnueabihf-rpi-deb-artifact
+  #         path: minidsp*.deb
+  #         if-no-files-found: error
+  #     - name: Create binary
+  #       run: |
+  #         mkdir archive
+  #         cp target/arm-unknown-linux-gnueabihf/release/minidsp archive
+  #         cd archive/
+  #         tar -czf ../minidsp.arm-linux-gnueabihf-rpi.tar.gz *
+  #     - name: Upload artifact
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: arm-linux-gnueabihf-rpi-artifact
+  #         path: minidsp.arm-linux-gnueabihf-rpi.tar.gz
+  #         if-no-files-found: error
   build_all:
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         pair:
           - target: x86_64-unknown-linux-gnu
@@ -56,7 +56,6 @@ jobs:
             bin: minidsp
             svc_bin: minidspd
             cross: true
-            cross_image: local/aarch64-unknown-linux-gnu-0.2.1
             cross_dockerfile: Dockerfile.aarch64
             archive: tar.gz
           - target: x86_64-apple-darwin
@@ -74,48 +73,54 @@ jobs:
 
     runs-on: ${{ matrix.pair.os }}
     env:
-      CARGO_DEB_VER: 1.35.0
+      CARGO_DEB_VER: 2.7.0
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v4
 
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: stable
-          target: ${{ matrix.pair.target }}
-          override: true
+          targets: ${{ matrix.pair.target }}
+
+      - name: Install Cargo Cross
+        if: runner.os == 'Linux'
+        run: |
+          curl -L -o /tmp/cross.tar.gz https://github.com/cross-rs/cross/releases/download/v0.2.5/cross-x86_64-unknown-linux-gnu.tar.gz
+          cd /usr/local/bin
+          tar -zxvf /tmp/cross.tar.gz          
 
       - name: Install native packages
         if: runner.os == 'Linux' && matrix.pair.cross == false
         run: sudo apt-get install libusb-1.0-0 libusb-1.0-0-dev
 
-      - name: Build cross image
-        if: runner.os == 'Linux' && matrix.pair.cross == true
-        run: |
-          docker build -t ${{ matrix.pair.cross_image }} -f scripts/${{ matrix.pair.cross_dockerfile }} scripts/
-
       # From https://github.com/NLnetLabs/krill/blob/master/.github/workflows/pkg.yml
       # Speed up cargo-deb installation by only re-downloading and re-building its
       # dependent crates if we change the version of cargo-deb that we are using.
+      # - name: Cache Cross binary
+      #   if: runner.os == 'Linux'
+      #   id: cache-cargo-cross
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: ~/.cargo/bin/deb
+      #     key: ${{ matrix.pair.target }}-cargo-deb-${{ env.CARGO_DEB_VER }}
+
       - name: Cache Cargo Deb binary
         if: runner.os == 'Linux'
         id: cache-cargo-deb
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.cargo/bin/cargo-deb
           key: ${{ matrix.pair.target }}-cargo-deb-${{ env.CARGO_DEB_VER }}
+
+      - run: |
+          cross build --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
 
       # Only install cargo-deb if not already fetched from the cache.
       - name: Install Cargo Deb
         if: runner.os == 'Linux' && steps.cache-cargo-deb.outputs.cache-hit != 'true'
         run: |
           cargo install cargo-deb --version $CARGO_DEB_VER
-
-      - uses: actions-rs/cargo@v1
-        with:
-          use-cross: ${{ matrix.pair.cross }}
-          command: build
-          args: --bin minidsp --bin minidspd --release --target ${{ matrix.pair.target }}
 
       - name: Create debian package
         if: runner.os == 'Linux'
@@ -125,7 +130,7 @@ jobs:
 
       - name: Upload debian package
         if: runner.os == 'Linux'
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.pair.target }}-deb
           path: minidsp*.deb
@@ -150,7 +155,7 @@ jobs:
           compress-archive -Path *.exe -DestinationPath ../minidsp.${{ matrix.pair.target }}.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v2.2.1
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.pair.target }}-artifact
           path: minidsp.${{ matrix.pair.target }}.${{ matrix.pair.archive }}
@@ -158,12 +163,12 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    needs: [build_all, build_rpi]
+    needs: [build_all]
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v4
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           path: artifacts
 
