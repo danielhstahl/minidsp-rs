@@ -32,7 +32,7 @@ pub(crate) fn input(input: usize) -> Input {
             enable: format!("BM_DGain_{}_status", 3 + output),
             gain: Some(format!("BM_DGain_{}", 3 + output)),
         }),*/
-        routing: (0..7usize)
+        routing: (0..8usize)
             .map(|output| Gate {
                 enable: format!("BM_Mixer_{}_{}_status", input + 1, output + 1),
                 gain: Some(format!("BM_Mixer_{}_{}", input + 1, output + 1)),
@@ -99,8 +99,8 @@ pub fn device() -> Device {
             "Usb".into(),
             "Hdmi".into(),
         ],
-        inputs: (0..7).map(input).collect(),
-        outputs: (0..7).map(output).collect(),
+        inputs: (0..8).map(input).collect(),
+        outputs: (0..8).map(output).collect(),
         fir_max_taps: 0,
         internal_sampling_rate: 48000,
         ..Default::default()
