@@ -2,8 +2,8 @@ name: Release build
 
 on:
   push:
-    branches:
-      - 'bump-deps'
+    # branches:
+    #   - 'bump-deps'
     tags:
       - 'v0.*'
       - 'v1.*'
