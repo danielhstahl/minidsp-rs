@@ -1,3 +1,4 @@
+#![allow(deprecated)] // until we get rid of the wav crate
 use std::path::Path;
 
 use thiserror::Error;

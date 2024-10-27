@@ -2,7 +2,7 @@
 authors = ["Mathieu Rene <mathieu.rene@gmail.com>"]
 edition = "2021"
 name = "minidsp-devtools"
-version = "0.1.9"
+version = "0.1.10"
 license = "Apache-2.0"
 
 [features]
@@ -11,26 +11,26 @@ symbols = ["minidsp/device"]
 devices = ["minidsp/devices"]
 
 [dependencies]
-anyhow = "1.0.79"
+anyhow = "1.0.91"
 bimap = "0.6.3"
-clap = "4.4.13"
-env_logger = "0.10.1"
-futures = "0.3.30"
-futures-sink = "0.3.30"
-futures-util = "0.3.30"
+clap = "4.5.20"
+env_logger = "0.10.2"
+futures = "0.3.31"
+futures-sink = "0.3.31"
+futures-util = "0.3.31"
 minidsp = {path = "../minidsp", version="0.1.4", default-features = false, features = []}
 strong-xml = "0.6.3"
-termcolor = "1.4.0"
+termcolor = "1.4.1"
 
 # Codegen
 Inflector = "0.11.4"
-proc-macro2 = "1.0.75"
-quote = "1.0.35"
+proc-macro2 = "1.0.89"
+quote = "1.0.37"
 
 [dependencies.tokio]
 features = ["rt-multi-thread", "net", "fs", "macros", "io-util"]
-version = "1.35.1"
+version = "1.41.0"
 
 [dependencies.tokio-util]
 features = ["net", "codec", "io"]
-version = "0.7.10"
+version = "0.7.12"
