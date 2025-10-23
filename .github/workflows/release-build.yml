@@ -145,7 +145,7 @@ jobs:
         run: |
           set -x
           assets=()
-          for asset in ./artifacts/*/*.{tar.gz,zip,deb}; do
+          for asset in ./artifacts/*/*.{tar.gz,deb}; do
             assets+=("$asset")
           done
           TAG="${GITHUB_REF##*/}"
