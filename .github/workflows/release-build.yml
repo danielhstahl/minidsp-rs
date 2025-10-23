@@ -149,6 +149,6 @@ jobs:
             assets+=("$asset")
           done
           TAG="${GITHUB_REF##*/}"
-          gh release create "$TAG" "${assets[@]}" --draft
+          gh release upload "$TAG" "${assets[@]}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
