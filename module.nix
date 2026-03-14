@@ -1,9 +1,15 @@
-self: { config, lib, pkgs, ... }:
+self:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 with lib;
 let
   cfg = config.services.minidsp;
-  tomlFormat = pkgs.formats.toml {};
+  tomlFormat = pkgs.formats.toml { };
 in
 {
   options = {
@@ -12,15 +18,15 @@ in
         type = types.bool;
         default = false;
         description = ''
-        Whether to enable the minidsp service
+          Whether to enable the minidsp service
         '';
       };
 
       package = mkOption {
         type = types.package;
-        default = self.packages.${pkgs.system}.default;
+        default = self.packages.${pkgs.stdenv.hostPlatform.system}.default;
         description = ''
-        minidsp package to use
+          minidsp package to use
         '';
       };
 
@@ -31,13 +37,15 @@ in
             bind_address = "127.0.0.1:5380";
           };
 
-          tcp_server = [{
-            bind_address = "127.0.0.1:5333";
-          }];
+          tcp_server = [
+            {
+              bind_address = "127.0.0.1:5333";
+            }
+          ];
         };
         description = ''
-        Configuration file
-        For available options see <https://minidsp-rs.pages.dev/daemon/>
+          Configuration file
+          For available options see <https://minidsp-rs.pages.dev/daemon/>
         '';
       };
     };
@@ -52,13 +60,13 @@ in
         group = "minidsp";
         isSystemUser = true;
       };
-      groups.minidsp = {};
+      groups.minidsp = { };
     };
 
     systemd.services.minidsp = {
-      after = ["network.target"];
+      after = [ "network.target" ];
       description = "minidsp daemon";
-      wantedBy = ["multi-user.target"];
+      wantedBy = [ "multi-user.target" ];
 
       serviceConfig = {
         User = "minidsp";
